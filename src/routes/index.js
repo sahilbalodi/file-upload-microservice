@@ -1,10 +1,8 @@
-const express = require('express');
-
-const router = express.Router();
-
-/* GET home page. */
-router.get('/', (req, res) => {
-  res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
+module.exports = {
+  method: 'GET',
+  path: '/ping',
+  handler: (request, response) => {
+    console.log(process.env.AWS_ACCESS_KEY_ID)
+    response({ statusCode: 200, message: 'pong' });
+  },
+}
