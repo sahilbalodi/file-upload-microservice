@@ -19,6 +19,7 @@
     "hapi": "^16.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.6.1",
+    "sequelize": "^4.39.0",
     "serve-favicon": "~2.3.0"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
     "nodemon": "^1.18.4",
     "nyc": "^13.0.1",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "sequelize-cli": "^5.1.0"
   }
 }

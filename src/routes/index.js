@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const Joi = require('joi');
+const models = require('../../models')
 
 module.exports = [
   {
@@ -54,22 +55,22 @@ module.exports = [
             return reply.response('Upload failed').code(501);
           }
           console.log('Successfully uploaded image');
-          // await models.uploads.destroy({
-          //   where: {
-          //     clientIdNumber,
-          //     imgNumber
-          //   }
-          // });
-          // models.uploads.create({
-          //   clientIdNumber,
-          //   imgNumber
-          // })
-          //   .then((insertedData) => {
-          //     if (insertedData) {
-          //       resolve(insertedData);
-          //     }
-          //   })
-          //   .catch(errs => reply.response(errs.stack).code(501));
+          await models.uploads.destroy({
+            where: {
+              clientIdNumber,
+              imgNumber
+            }
+          });
+          models.uploads.create({
+            clientIdNumber,
+            imgNumber
+          })
+            .then((insertedData) => {
+              if (insertedData) {
+                resolve(insertedData);
+              }
+            })
+            .catch(errs => reply.response(errs.stack).code(501));
         });
       });
       return promise;
