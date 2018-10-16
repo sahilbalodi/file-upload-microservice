@@ -29,6 +29,7 @@ module.exports = [
     handler: (request, reply) => {
       const { clientIdNumber, imgNumber } = request.params;
       const image = fs.readFileSync(request.payload.file.path);
+      const fileName = request.payload.file.filename.replace(/\s/g, '');
       const s3 = new AWS.S3({
         apiVersion: '2006-03-01',
         region: process.env.AWS_REGION,
@@ -39,11 +40,15 @@ module.exports = [
         sslEnabled: true
       });
       const promise = new Promise((resolve, reject) => {
+        request.payload.file.filename = request.payload.file.filename.replace(
+          /\s/g,
+          ''
+        );
         const params = {
           ACL: 'private',
           ServerSideEncryption: 'aws:kms',
           Bucket: process.env.AWS_S3_BUCKET,
-          Key: `${process.env.APP_NAME}/${clientIdNumber}/${imgNumber}`,
+          Key: `${process.env.APP_NAME}/${clientIdNumber}/${imgNumber}/${request.payload.file.filename}`,
           Body: image,
           ContentType: 'image/png',
           SSEKMSKeyId: process.env.AWS_S3_KMS_KEY_ARN
