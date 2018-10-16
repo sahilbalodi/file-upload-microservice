@@ -31,13 +31,9 @@ module.exports = [
       const image = fs.readFileSync(request.payload.file.path);
       const fileName = request.payload.file.filename.replace(/\s/g, '');
       const s3 = new AWS.S3({
-        apiVersion: '2006-03-01',
-        region: process.env.AWS_REGION,
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         sessionToken: process.env.AWS_SESSION_TOKEN,
-        signatureVersion: 'v4',
-        sslEnabled: true
       });
       const promise = new Promise((resolve, reject) => {
         request.payload.file.filename = request.payload.file.filename.replace(
@@ -45,13 +41,10 @@ module.exports = [
           ''
         );
         const params = {
-          ACL: 'private',
-          ServerSideEncryption: 'aws:kms',
           Bucket: process.env.AWS_S3_BUCKET,
           Key: `${process.env.APP_NAME}/${clientIdNumber}/${imgNumber}/${request.payload.file.filename}`,
           Body: image,
-          ContentType: 'image/png',
-          SSEKMSKeyId: process.env.AWS_S3_KMS_KEY_ARN
+          ContentType: 'image/png'
         };
 
         s3.putObject(params, async (err, data) => {
