@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const Joi = require('joi');
-const models = require('../../models')
 
 module.exports = [
   {
@@ -13,7 +12,7 @@ module.exports = [
   },
   {
     method: 'POST',
-    path: '/api/{clientIdNumber}/{imgNumber}/upload',
+    path: '/api/upload/{key}',
     config: {
       payload: {
         output: 'file',
@@ -21,56 +20,31 @@ module.exports = [
       },
       validate: {
         params: {
-          clientIdNumber: Joi.number().integer().required(),
-          imgNumber: Joi.number().integer().required()
+          key: Joi.string().required()
         }
       }
     },
     handler: (request, reply) => {
-      const { clientIdNumber, imgNumber } = request.params;
-      const image = fs.readFileSync(request.payload.file.path);
+      const file = fs.readFileSync(request.payload.file.path);
       const s3 = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         sessionToken: process.env.AWS_SESSION_TOKEN,
       });
-      const promise = new Promise((resolve, reject) => {
-        request.payload.file.filename = request.payload.file.filename.replace(
-          /\s/g,
-          ''
-        );
-        const params = {
-          Bucket: process.env.AWS_S3_BUCKET,
-          Key: `${process.env.APP_NAME}/${clientIdNumber}/${imgNumber}/${request.payload.file.filename}`,
-          Body: image,
-          ContentType: 'image/png'
-        };
+      const params = {
+        Bucket: process.env.AWS_S3_BUCKET,
+        Key: `${request.params.key}`,
+        Body: file
+      };
 
-        s3.putObject(params, async (err, data) => {
-          if (err) {
-            console.log(err.stack);
-            return reply.response('Upload failed').code(501);
-          }
-          console.log('Successfully uploaded image');
-          await models.uploads.destroy({
-            where: {
-              clientIdNumber,
-              imgNumber
-            }
-          });
-          models.uploads.create({
-            clientIdNumber,
-            imgNumber
-          })
-            .then((insertedData) => {
-              if (insertedData) {
-                resolve(insertedData);
-              }
-            })
-            .catch(errs => reply.response(errs.stack).code(501));
-        });
+      s3.putObject(params, async (err, data) => {
+        if (err) {
+          console.log(err.stack);
+          return reply.response('Upload failed').code(501);
+        }
+        console.log('Successfully uploaded image');
+        reply.response('Successfully uploaded image').code(200);
       });
-      return promise;
     }
   }
 ];
