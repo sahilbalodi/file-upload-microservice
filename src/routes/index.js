@@ -46,5 +46,39 @@ module.exports = [
         reply.response('Successfully uploaded image').code(200);
       });
     }
+  },
+  {
+    method: 'GET',
+    path: '/api/upload/{key}',
+    config: {
+      validate: {
+        params: {
+          key: Joi.string().required()
+        }
+      }
+    },
+    handler: async (request, reply) => {
+      const s3 = new AWS.S3({
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        sessionToken: process.env.AWS_SESSION_TOKEN,
+      });
+      const urlParams = {
+        Bucket: process.env.AWS_S3_BUCKET,
+        Key: `${request.params.key}`
+      };
+      s3.getSignedUrl('getObject', urlParams, (error, url) => {
+        if (error) {
+          console.log('Url sigining error: ', error.stack);
+          console.log(error.stack);
+          return reply.response('Url error').code(501);
+        }
+        console.log('the url of the image is', url);
+        reply({
+          statusCode: 200,
+          url
+        })
+      });
+    }
   }
 ];
