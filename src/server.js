@@ -9,7 +9,7 @@ server.connection({
   port: Port,
 });
 
-server.route([routes]);
+server.route(routes);
 
 const start = async () => {
   await server.start();
