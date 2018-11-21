@@ -29,7 +29,8 @@ module.exports = [
       const s3 = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        sessionToken: process.env.AWS_SESSION_TOKEN,
+        signatureVersion: 'v4',
+        region: process.env.AWS_REGION
       });
       const params = {
         Bucket: process.env.AWS_S3_BUCKET,
@@ -37,19 +38,19 @@ module.exports = [
         Body: file
       };
 
-      s3.putObject(params, async (err, data) => {
+      s3.putObject(params, async (err) => {
         if (err) {
           console.log(err.stack);
           return reply.response('Upload failed').code(501);
         }
-        console.log('Successfully uploaded image');
-        reply.response('Successfully uploaded image').code(200);
+        console.log('Successfully uploaded file');
+        reply.response('Successfully uploaded file').code(200);
       });
     }
   },
   {
     method: 'GET',
-    path: '/api/upload/{key}',
+    path: '/api/download/{key}',
     config: {
       validate: {
         params: {
@@ -61,7 +62,8 @@ module.exports = [
       const s3 = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        sessionToken: process.env.AWS_SESSION_TOKEN,
+        signatureVersion: 'v4',
+        region: process.env.AWS_REGION
       });
       const urlParams = {
         Bucket: process.env.AWS_S3_BUCKET,
@@ -73,7 +75,7 @@ module.exports = [
           console.log(error.stack);
           return reply.response('Url error').code(501);
         }
-        console.log('the url of the image is', url);
+        console.log('the url of the file is', url);
         reply({
           statusCode: 200,
           url
